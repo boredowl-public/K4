@@ -1,0 +1,49 @@
+(*
+	Guessing game in K4
+	
+	Jonathan Masters
+	Bored Owl Pty Ltd
+	Nov 2025
+*)
+." stdext.k4" include
+clear
+#
+vocab guessing
+setvocab guessing
+#
+variable range
+100 range store
+: debug ." ---->" .r stack ;
+: picknumber random range fetch % 1+ ;
+: inrange dup 0 > swap 101 < and ;
+: ask
+	begin
+		." Pick a number between 1 and: " . range @ . \? emit space flush 
+		input
+		$> stoi 		(* true/false on tos, value one below *)
+		2 pick			(* duplicate value below to tos *)
+		inrange and
+	until
+;
+variable guesses
+variable trying
+variable secret
+: play
+	0 guesses store
+	picknumber secret store
+	begin
+		clear
+#		secret fetch . space
+		ask trying store
+		guesses fetch 1 + guesses store
+		trying fetch secret fetch < if
+			." Your guess is too low!" .r
+		then
+		trying fetch secret fetch > if
+			." Your guess is too high!" .r
+		then
+		trying fetch secret fetch = dup if
+			." You got it in: " . guesses fetch . ." \ guesses! Well done" .r
+		then
+	until
+;
