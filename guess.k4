@@ -14,14 +14,14 @@ setvocab guessing
 variable range
 100 range store
 : debug ." ---->" .r stack ;
-: picknumber random range fetch % 1+ ;
+: pick random range fetch % 1+ ;
 : inrange dup 0 > swap 101 < and ;
 : ask
 	begin
 		." Pick a number between 1 and: " . range @ . \? emit space flush 
 		input
 		$> stoi 		(* true/false on tos, value one below *)
-		2 pick			(* duplicate value below to tos *)
+		2 _::pick		(* duplicate value below to tos *)
 		inrange and
 	until
 ;
@@ -30,10 +30,9 @@ variable trying
 variable secret
 : play
 	0 guesses store
-	picknumber secret store
+	pick secret store
 	begin
 		clear
-#		secret fetch . space
 		ask trying store
 		guesses fetch 1 + guesses store
 		trying fetch secret fetch < if
