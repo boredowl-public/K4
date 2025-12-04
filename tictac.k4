@@ -1,0 +1,307 @@
+(*
+	A two player tic-tac-toe game in K4
+	
+	Author: Jonathan Masters, November 2025
+	(C) 2025 Bored Owl Pty Ltd
+*)
+	
+." stdext.k4" include
+#
+variable board 9 allotc
+#
+# Cell values for empty, x  and o
+#
+0 constant EMPTY
+1 constant O
+2 constant X
+#
+# given a cell number (0..8) load the cell
+# and print X, O or ' '. If the cell value
+# is not expected, print '?'
+#
+: xo 1 0 {
+      1 () X = if
+              \X emit
+      else
+              1 () O = if
+                      \O emit
+              else
+                      1 () EMPTY = if
+                              20 emit
+                      else
+                              \? emit
+                      then
+              then
+      then
+} ;
+#
+# <col> <row> cell - push cell number
+# (col, row range is 0..2)
+#
+: cell 3 * + ;
+#
+# <col> <row> cell@ - push the value at cell
+#
+: cell@ cell board _ @c ;
+: xcell@ cell board _ @c dup 0 = if 4 then ;
+#
+# <mark> <col> <row> cell - mark the board
+# at row, col with X, O or EMPTY
+#
+: cell! cell board _ !c ;
+#
+# <col> <row> cell! - print the mark on the
+#     board at <col> and <row>
+#
+: .cell cell@ xo ;
+#
+# display the board with the # markers
+#
+: bar ." -+-+-\n" ;
+: board?
+      X 0 0 
+      3 0 do
+              3 0 do
+                      I J .cell
+                      I 2 < if
+                              \| emit
+                      then
+              loop
+              10 emit
+              I 2 = not if
+                      bar .
+              then
+      loop 
+      nl ;
+#
+# display the board in 3x3 with cell numbers
+# and cell values
+#
+: debugboard
+      3 0 do
+              I . \: emit
+              3 0 do
+                      20 emit I J cell ..d \= emit board _ @c .
+              loop
+              nl
+      loop ;
+#
+# Empty the board for a new game
+#
+: newgame 9 0 do EMPTY board I _ !c loop ;
+#
+# <row> checkrow
+# push X, O or EMPTY if X wins row, O wins
+#     or nobody's winning
+#
+: checkrow 1 1 {
+      0 1 #st
+      3 0 do
+              I 1 () xcell@ 1 #ld or 1 #st
+      loop
+      1 #ld X = 1 #ld O = or not
+      if
+              EMPTY 1 #st
+      then
+      1 #ld
+1 ->} ;
+#
+: checkrows
+      0
+      3 0 do
+        I checkrow ifnz swap drop leave else drop then
+      loop ;
+#
+# <col> checkcol
+# push X, O or EMPTY if X wins col, O wins
+#     or nobody's winning
+# 
+: checkcol 1 1 {
+      0 1 #st
+      3 0 do
+              1 () I xcell@ 1 #ld or 1 #st
+      loop
+      1 #ld X = 1 #ld O = or not
+      if
+              EMPTY 1 #st
+      then
+      1 #ld
+1 ->} ;
+#
+: checkcols
+      0
+      3 0 do
+              I checkcol ifnz swap drop leave else drop then
+      loop ;
+#
+# Check the left-right and right to left diagonals and
+# push X, O or EMPTY if X wins , O wins
+#     or nobody's winning
+: checkdia 0 2 {
+	0 1 #st
+	0 2 #st
+	3 0 do
+		I I xcell@ 1 #ld or 1 #st
+		2 I - I xcell@ 2 #ld or 2 #st
+	loop
+	1 #ld X = 1 #ld O = or not
+	if
+    	EMPTY 1 #st
+	then
+	2 #ld X = 2 #ld O = or not
+	if
+		EMPTY 2 #st
+	then
+	1 #ld 2 #ld or 1 #st
+	1 #ld X = 1 #ld O = or not
+	if
+		EMPTY 1 #st
+	then
+  	1 #ld
+1 ->} ;
+#
+# full - return true if the board is full
+#
+: full 9 0 do
+	I board _ @c
+	ifz
+		drop false leave
+	else
+		drop true
+	then
+loop ;
+#
+: Xwin ." X Wins!" ;
+: Owin ." O Wins!" ;
+#
+# win? - print who wins, return true if
+#     game is over
+#
+: win? 1 0 {
+      1 () X = if
+              Xwin .r
+              true
+      else 1 () O = if
+                      Owin .r
+                      true
+              else
+                      false
+              then
+      then
+1 ->}  ;
+#
+# gameends
+#
+: gameends
+	checkrows
+	checkcols
+	checkdia
+	or
+	or
+	win? if
+		true
+	else
+		full if
+			." Its a draw!" .r
+			true
+		else
+			false
+		then
+	then
+;
+#
+# play -- loop until game ends
+#
+variable player
+: toggleplayer
+      player @ X =
+      if
+              O player !
+      else
+              X player !
+      then ;
+: player?
+      player @ X =
+      if
+              ." 'X' to play:\n" .
+      else
+              ." 'O' to play:\n" .
+      then ;
+#
+: rowcolstr ." Enter 1,2 or 3 please!  " ;
+: readrc 1 2 {
+      false 2 #st
+      begin
+              1 () .
+              input
+              $> strlen 2 = if
+                      $> @c \0 - 1 #st
+                      1 #ld 1 < 1 #ld 3 > or if
+                              rowcolstr .
+                      else
+                              true 2 #st
+                      then
+              else
+                      rowcolstr .
+              then
+              2 #ld
+      until
+1 #ld 1 ->} ;
+#
+: readrow 0 0 {
+      ." Row? " readrc
+      1-
+1 ->}
+;
+#
+: readcol 0 0 {
+      ." Col? " readrc
+      1-
+1 ->}
+;
+#
+: empty cell@ 0 = not
+if
+      ." Cell is not empty! Try Again\n" .
+      false
+else
+      true
+then ;
+#
+: move 
+      player?
+      begin
+              clear
+              player @
+              readcol
+              readrow
+              over over
+              empty
+      until
+      cell!
+;
+#
+# randomplayer - chose a random player to start
+#
+: randomplayer random 2 % 1 + ;
+#
+# play2 - two player (non computer) game
+#
+: play2
+      newgame
+      board?
+      randomplayer player store
+      begin
+              toggleplayer
+              move
+              board?
+              gameends
+      until ;
+#
+# play1 - single player vs computer
+#
+: play1
+	newgame
+	randomplayer
+;
+clear

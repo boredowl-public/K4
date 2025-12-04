@@ -1,0 +1,21 @@
+(*
+	K4 Standard Extensions (non-built-in)
+	(use: '." stdext.k4" include' to read into your dictionary
+
+	Author: Jonathan Masters
+	(C) 2025 Bored Owl Pty Ltd
+*)
+#
+# <n> historic : print the nth last item in the history
+#
+: historic $cmd $> . ;
+#
+# .r, .xr, ..r, ..xr - prints with returns
+#
+: nl 10 emit ;
+: .r . nl ;
+: .xr .x nl ;
+: ..r .. nl ;
+: ..xr ..x nl ;
+# tab : emits a tab character
+: tab 9 emit ;

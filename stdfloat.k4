@@ -1,0 +1,15 @@
+(*
+	K4 Floating point extension
+	(Your K4 implementation must be compiled to support floats)
+	(use: 'include stext.k4' to read into your dictionary
+	
+	Author: Jonathan Masters
+	(C) 2025 Bored Owl Pty Ltd
+*)
+: F 17 f. ;							(* Easy float print *)
+#
+: flog fln 10.0 f/ ;				(* Log base 10 *)
+#
+: f>= f< not ;
+: f<= f> not ;
+: fne f= not ;

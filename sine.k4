@@ -1,0 +1,9 @@
+." stdext.k4" include
+clear
+: .F 5 .f ;
+: .fr .F nl ;
+: F 0 itof ;
+: iradians 0 itof ." 0.0174533" stof f* ." 0.000001" f+ ;
+variable step
+10 step store
+: wave 360 step fetch  / 0 do I . tab I step fetch * iradians dup .F tab fcos 2 ftoi 3 / 35 + spaces \* emit nl loop ;
