@@ -15,7 +15,7 @@ variable range
 100 range store
 : debug ." ---->" .r stack ;
 : pick random range fetch % 1+ ;
-: inrange dup 0 > swap 101 < and ;
+: inrange dup 0 > swap range fetch 1 + < and ;
 : ask
 	begin
 		." Pick a number between 1 and: " . range @ . \? emit space flush 
